@@ -7,7 +7,7 @@ var OP_CODES = [
   new Buffer([0x15])  // No metadata or rules (no SHA1 or SHA2)
 ]
 
-var paymentCodex = require('ccPaymentEncoder')
+var paymentCodex = require('cc-payment-encoder')
 
 var consumer = function (buff) {
   var curr = 0
