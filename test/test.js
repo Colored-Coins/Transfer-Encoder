@@ -28,41 +28,41 @@ describe('BALZ Decoding', function () {
     data.sha2 = sha2
     data.torrentHash = torrentHash
 
-    data.transfers = []
-    data.transfers.push({skip: false, range: false, precent: true, output: 12, amountOfUnits: 3213213})
+    data.payments = []
+    data.payments.push({skip: false, range: false, precent: true, output: 12, amountOfUnits: 3213213})
     var result = ccEncoding.encode(data, 40)
     console.log(result.codeBuffer.toString('hex'), result.leftover)
     console.log(ccEncoding.decode(result.codeBuffer))
 
-    data.transfers.push({skip: false, range: false, precent: true, output: 1, amountOfUnits: 321321321})
+    data.payments.push({skip: false, range: false, precent: true, output: 1, amountOfUnits: 321321321})
     result = ccEncoding.encode(data, 40)
     console.log(result.codeBuffer.toString('hex'), result.leftover)
     console.log(ccEncoding.decode(result.codeBuffer))
 
-    data.transfers.push({skip: true, range: true, precent: true, output: 10, amountOfUnits: 1})
+    data.payments.push({skip: true, range: true, precent: true, output: 10, amountOfUnits: 1})
     result = ccEncoding.encode(data, 40)
     console.log(result.codeBuffer.toString('hex'), result.leftover)
     console.log(ccEncoding.decode(result.codeBuffer))
 
-    data.transfers.push({skip: false, range: false, precent: true, output: 20, amountOfUnits: 100000021000})
+    data.payments.push({skip: false, range: false, precent: true, output: 20, amountOfUnits: 100000021000})
     result = ccEncoding.encode(data, 40)
     console.log(result.codeBuffer.toString('hex'), result.leftover)
     console.log(ccEncoding.decode(result.codeBuffer))
 
-    data.transfers.push({skip: false, range: false, precent: false, output: 0, amountOfUnits: 1})
-    data.transfers.push({skip: false, range: false, precent: false, output: 1, amountOfUnits: 2})
-    data.transfers.push({skip: true, range: false, precent: false, output: 2, amountOfUnits: 3})
-    data.transfers.push({skip: false, range: false, precent: false, output: 3, amountOfUnits: 4})
-    data.transfers.push({skip: true, range: false, precent: false, output: 4, amountOfUnits: 5})
-    data.transfers.push({skip: false, range: false, precent: false, output: 5, amountOfUnits: 6})
+    data.payments.push({skip: false, range: false, precent: false, output: 0, amountOfUnits: 1})
+    data.payments.push({skip: false, range: false, precent: false, output: 1, amountOfUnits: 2})
+    data.payments.push({skip: true, range: false, precent: false, output: 2, amountOfUnits: 3})
+    data.payments.push({skip: false, range: false, precent: false, output: 3, amountOfUnits: 4})
+    data.payments.push({skip: true, range: false, precent: false, output: 4, amountOfUnits: 5})
+    data.payments.push({skip: false, range: false, precent: false, output: 5, amountOfUnits: 6})
 
     result = ccEncoding.encode(data, 40)
     console.log(result.codeBuffer.toString('hex'), result.leftover)
     console.log(ccEncoding.decode(result.codeBuffer))
 
     delete data.allowMeta
-    data.transfers = []
-    data.transfers.push({skip: false, range: false, precent: true, output: 12, amountOfUnits: 3213213})
+    data.payments = []
+    data.payments.push({skip: false, range: false, precent: true, output: 12, amountOfUnits: 3213213})
     result = ccEncoding.encode(data, 80)
     console.log(result.codeBuffer.toString('hex'), result.leftover)
     console.log(ccEncoding.decode(result.codeBuffer))
