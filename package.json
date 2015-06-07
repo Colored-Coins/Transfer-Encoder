@@ -1,0 +1,24 @@
+{
+  "name": "cc-transfer-encoder",
+  "version": "0.1.1",
+  "description": "The encoding/decoding functions for the colored-coins scheme transfer set of OP_CODES",
+  "main": "transferEncoder.js",
+  "dependencies": {
+    "ccPaymentEncoder": "^0.1.0"
+  },
+  "directories": {
+      "test": "test"
+    },
+  "scripts": {
+     "test": "mocha",
+     "coverage": "istanbul cover _mocha -- -R spec",
+     "coveralls": "cat ./coverage/lcov.info | coveralls"
+   },
+  "author": "thehobbit85",
+  "license": "MIT",
+  "keywords": ["colored coins", "bitcoin", "blockchain"],
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/Colored-Coins/Transfer-Encoder.git"
+  }
+}
