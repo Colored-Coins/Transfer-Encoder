@@ -21,8 +21,8 @@ describe('BALZ Decoding', function () {
     sha2[21] = 0x23
     sha2[11] = 0x2f
     var data = {
-      protocol: 0x1302, // Error when start with 0
-      version: 0x13
+      protocol: 0x0302, // Error when start with 0
+      version: 0x03
     }
 
     data.sha2 = sha2

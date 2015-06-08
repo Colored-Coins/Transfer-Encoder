@@ -16,6 +16,10 @@ var consumer = function (buff) {
   }
 }
 
+var padLeadingZeros = function (hex, byteSize) {
+  return (hex.length === byteSize * 2) ? hex : padLeadingZeros('0' + hex, byteSize)
+}
+
 module.exports = {
   encode: function (data, byteSize) {
     if (!data
@@ -25,8 +29,8 @@ module.exports = {
     }
     var opcode
     var hash = new Buffer(0)
-    var protocol = new Buffer(data.protocol.toString(16), 'hex')
-    var version = new Buffer(data.version.toString(16), 'hex')
+    var protocol = new Buffer(padLeadingZeros(data.protocol.toString(16), 2), 'hex')
+    var version = new Buffer([data.version])
     var transferHeader = Buffer.concat([protocol, version])
     var payments = paymentCodex.encodeBulk(data.payments)
     var issueByteSize = transferHeader.length + payments.length + 1
