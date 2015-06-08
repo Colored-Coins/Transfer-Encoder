@@ -66,8 +66,8 @@ module.exports = {
   decode: function (op_code_buffer) {
     var data = {}
     var consume = consumer(op_code_buffer)
-    data.protocol = consume(2).toString('hex')
-    data.version = consume(1).toString('hex')
+    data.protocol = parseInt(consume(2).toString('hex'), 16)
+    data.version = parseInt(consume(1).toString('hex'), 16)
     var opcode = consume(1)
     if (opcode.equals(OP_CODES[1])) {
       data.torrentHash = consume(20)
