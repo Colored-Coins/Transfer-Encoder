@@ -38,26 +38,26 @@ module.exports = {
     if (issueByteSize > byteSize) throw new Error('Data code is bigger then the allowed byte size')
     if (!data.sha2) {
       if (data.torrentHash) {
-        opcode = data.noRules ? OP_CODES[5] : OP_CODES[4]
+        opcode = data.noRules ? OP_CODES[4] : OP_CODES[3]
         if (issueByteSize + data.torrentHash.length > byteSize) throw new Error('Can\'t fit Torrent Hash in byte size')
         return {codeBuffer: Buffer.concat([transferHeader, opcode, data.torrentHash, payments]), leftover: []}
       }
-      return {codeBuffer: Buffer.concat([transferHeader, OP_CODES[6], hash, payments]), leftover: []}
+      return {codeBuffer: Buffer.concat([transferHeader, OP_CODES[5], hash, payments]), leftover: []}
     }
     if (!data.torrentHash) throw new Error('Torrent Hash is missing')
     var leftover = [data.torrentHash, data.sha2]
 
-    opcode = OP_CODES[3]
+    opcode = OP_CODES[2]
     issueByteSize = issueByteSize + data.torrentHash.length
 
     if (issueByteSize <= byteSize) {
       hash = Buffer.concat([hash, leftover.shift()])
-      opcode = OP_CODES[2]
+      opcode = OP_CODES[1]
       issueByteSize = issueByteSize + data.sha2.length
     }
     if (issueByteSize <= byteSize) {
       hash = Buffer.concat([hash, leftover.shift()])
-      opcode = OP_CODES[1]
+      opcode = OP_CODES[0]
     }
 
     return {codeBuffer: Buffer.concat([transferHeader, opcode, hash, payments]), leftover: leftover}
@@ -69,19 +69,19 @@ module.exports = {
     data.protocol = parseInt(consume(2).toString('hex'), 16)
     data.version = parseInt(consume(1).toString('hex'), 16)
     var opcode = consume(1)
-    if (opcode.equals(OP_CODES[1])) {
+    if (opcode.equals(OP_CODES[0])) {
       data.torrentHash = consume(20)
       data.sha2 = consume(32)
-    } else if (opcode.equals(OP_CODES[2])) {
+    } else if (opcode.equals(OP_CODES[1])) {
       data.torrentHash = consume(20)
+    } else if (opcode.equals(OP_CODES[2])) {
     } else if (opcode.equals(OP_CODES[3])) {
-    } else if (opcode.equals(OP_CODES[4])) {
       data.torrentHash = consume(20)
       data.noRules = false
-    } else if (opcode.equals(OP_CODES[5])) {
+    } else if (opcode.equals(OP_CODES[4])) {
       data.torrentHash = consume(20)
       data.noRules = true
-    } else if (opcode.equals(OP_CODES[6])) {
+    } else if (opcode.equals(OP_CODES[5])) {
     } else {
       throw new Error('Unrecognized Code')
     }
