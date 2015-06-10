@@ -68,13 +68,17 @@ module.exports = {
     var consume = consumer(op_code_buffer)
     data.protocol = parseInt(consume(2).toString('hex'), 16)
     data.version = parseInt(consume(1).toString('hex'), 16)
+    data.multiSig = []
     var opcode = consume(1)
     if (opcode[0] === OP_CODES[0][0]) {
       data.torrentHash = consume(20)
       data.sha2 = consume(32)
     } else if (opcode[0] === OP_CODES[1][0]) {
       data.torrentHash = consume(20)
+      data.multiSig.push({'index': 1, 'hashType': 'sha2'})
     } else if (opcode[0] === OP_CODES[2][0]) {
+      data.multiSig.push({'index': 1, 'hashType': 'sha2'})
+      data.multiSig.push({'index': 2, 'hashType': 'torrentHash'})
     } else if (opcode[0] === OP_CODES[3][0]) {
       data.torrentHash = consume(20)
       data.noRules = false
