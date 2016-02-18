@@ -1,6 +1,6 @@
 {
   "name": "cc-transfer-encoder",
-  "version": "0.3.3",
+  "version": "1.0.0",
   "description": "The encoding/decoding functions for the colored-coins scheme transfer set of OP_CODES",
   "main": "transferEncoder.js",
   "dependencies": {
