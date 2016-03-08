@@ -1,6 +1,22 @@
 var ccEncoding = require(__dirname + '/../transferEncoder')
+var assert = require('assert')
 
-describe('BALZ Decoding', function () {
+var consumer = function (buff) {
+  var curr = 0
+  return function consume (len) {
+    return buff.slice(curr, curr += len)
+  }
+}
+
+var toBuffer = function (val) {
+  val = val.toString(16)
+  if (val.length % 2 == 1) {
+    val = '0'+val
+  }
+  return new Buffer(val, 'hex')
+}
+
+describe('Colored-Coins transfer Decoding', function () {
   it('should return the right decoding', function (done) {
     this.timeout(0)
     var torrentHash = new Buffer(20)
@@ -66,6 +82,192 @@ describe('BALZ Decoding', function () {
     result = ccEncoding.encode(data, 80)
     console.log(result.codeBuffer.toString('hex'), result.leftover)
     console.log(ccEncoding.decode(result.codeBuffer))
+    done()
+  })
+
+})
+
+describe('80 byte OP_RETURN', function () {
+
+  var code
+  var decoded
+  var torrentHash = new Buffer('46b7e0d000d69330ac1caa48c6559763828762e1', 'hex')
+  var sha2 = new Buffer('03ffdf3d6790a21c5fc97a62fe1abc5f66922d7dee3725261ce02e86f078d190', 'hex')
+  var data = {
+    protocol: 0x4343,
+    version: 0x02,
+    payments: []
+  }
+  data.payments.push({skip: false, range: false, percent: false, output: 1, amount: 31})
+
+  it('Transfer OP_CODE 0x15 - No Metadata', function (done) {
+    this.timeout(0)
+
+    code = ccEncoding.encode(data, 80)    
+
+    console.log(code.codeBuffer.toString('hex'), code.leftover)
+    var consume = consumer(code.codeBuffer.slice(0, code.codeBuffer.length))
+    assert.deepEqual(toBuffer('4343'), consume(2))
+    assert.deepEqual(toBuffer('02'), consume(1))  //version
+    assert.deepEqual(toBuffer('15'), consume(1))  //trasnfer OP_CODE
+    assert.deepEqual(toBuffer('011f'), consume(2))  //payments
+
+    decoded = ccEncoding.decode(code.codeBuffer)
+    console.log(decoded)
+
+    assert.equal(decoded.protocol, data.protocol)
+    assert.deepEqual(decoded.payments, data.payments)
+    assert.deepEqual(decoded.multiSig, code.leftover)
+    done()
+  })
+
+  it('Transfer OP_CODE 0x14 - SHA1 Torrent hash in OP_RETURN, no SHA256 of metadata, no rules in metadata', function (done) {
+    this.timeout(0)
+
+    data.torrentHash = torrentHash
+    data.noRules = true
+
+    code = ccEncoding.encode(data, 80)    
+
+    console.log(code.codeBuffer.toString('hex'), code.leftover)
+    var consume = consumer(code.codeBuffer.slice(0, code.codeBuffer.length))
+    assert.deepEqual(toBuffer('4343'), consume(2))
+    assert.deepEqual(toBuffer('02'), consume(1))  //version
+    assert.deepEqual(toBuffer('14'), consume(1))  //trasnfer OP_CODE
+    assert.deepEqual(toBuffer('46b7e0d000d69330ac1caa48c6559763828762e1'), consume(20))   //torrent hash
+    assert.deepEqual(toBuffer('011f'), consume(2))  //payments
+
+    decoded = ccEncoding.decode(code.codeBuffer)
+    console.log(decoded)
+
+    assert.equal(decoded.protocol, data.protocol)
+    assert.deepEqual(decoded.payments, data.payments)
+    assert.deepEqual(decoded.multiSig, code.leftover)
+    assert.deepEqual(decoded.torrentHash, torrentHash)
+    done()
+  })
+
+  it('Transfer OP_CODE 0x13 - SHA1 Torrent hash in OP_RETURN, no SHA256 of metadata', function (done) {
+    this.timeout(0)
+
+    data.torrentHash = torrentHash
+    delete data.noRules
+
+    code = ccEncoding.encode(data, 80)    
+
+    console.log(code.codeBuffer.toString('hex'), code.leftover)
+    var consume = consumer(code.codeBuffer.slice(0, code.codeBuffer.length))
+    assert.deepEqual(toBuffer('4343'), consume(2))
+    assert.deepEqual(toBuffer('02'), consume(1))  //version
+    assert.deepEqual(toBuffer('13'), consume(1))  //trasnfer OP_CODE
+    assert.deepEqual(toBuffer('46b7e0d000d69330ac1caa48c6559763828762e1'), consume(20))   //torrent hash
+    assert.deepEqual(toBuffer('011f'), consume(2))  //payments
+
+    decoded = ccEncoding.decode(code.codeBuffer)
+    console.log(decoded)
+
+    assert.equal(decoded.protocol, data.protocol)
+    assert.deepEqual(decoded.payments, data.payments)
+    assert.deepEqual(decoded.multiSig, code.leftover)
+    assert.deepEqual(decoded.torrentHash, torrentHash)
+    done()
+  })
+
+  it('Transfer OP_CODE 0x10 - SHA1 Torrent hash + SHA256 of metadata in OP_RETURN', function (done) {
+    this.timeout(0)
+
+    //pushing payments to the limit.
+    data.payments = []
+    for (var i = 0 ; i < 12 ; i++) {
+      data.payments.push({skip: false, range: false, percent: false, output: 1, amount: 1})
+    }
+
+    data.torrentHash = torrentHash
+    data.sha2 = sha2
+
+    code = ccEncoding.encode(data, 80)    
+
+    console.log(code.codeBuffer.toString('hex'), code.leftover)
+    var consume = consumer(code.codeBuffer.slice(0, code.codeBuffer.length))
+    assert.deepEqual(toBuffer('4343'), consume(2))
+    assert.deepEqual(toBuffer('02'), consume(1))  //version
+    assert.deepEqual(toBuffer('10'), consume(1))  //trasnfer OP_CODE
+    assert.deepEqual(toBuffer('46b7e0d000d69330ac1caa48c6559763828762e1'), consume(20))   //torrent hash
+    assert.deepEqual(toBuffer('03ffdf3d6790a21c5fc97a62fe1abc5f66922d7dee3725261ce02e86f078d190'), consume(32))   //metadata sha2
+    for (var i = 0 ; i < data.payments.length ; i++) {
+      assert.deepEqual(toBuffer('0101'), consume(2))    //payment
+    }
+
+    decoded = ccEncoding.decode(code.codeBuffer)
+    console.log(decoded)
+
+    assert.equal(decoded.protocol, data.protocol)
+    assert.deepEqual(decoded.payments, data.payments)
+    assert.deepEqual(decoded.multiSig, code.leftover)
+    assert.deepEqual(decoded.torrentHash, torrentHash)
+    assert.deepEqual(decoded.sha2, sha2)
+    done()
+  })
+
+  it('Transfer OP_CODE 0x11 - SHA1 Torrent hash in OP_RETURN, SHA256 in 1(2) multisig', function (done) {
+    this.timeout(0)
+
+    //1 more transfer instruction (2 bytes in this case) should push torrent hash out
+    data.payments.push({skip: false, range: false, percent: false, output: 1, amount: 1})
+
+    code = ccEncoding.encode(data, 80)    
+
+    console.log(code.codeBuffer.toString('hex'), code.leftover)
+    var consume = consumer(code.codeBuffer.slice(0, code.codeBuffer.length))
+    assert.deepEqual(toBuffer('4343'), consume(2))
+    assert.deepEqual(toBuffer('02'), consume(1))  //version
+    assert.deepEqual(toBuffer('11'), consume(1))  //trasnfer OP_CODE
+    assert.deepEqual(toBuffer('46b7e0d000d69330ac1caa48c6559763828762e1'), consume(20))   //torrent hash
+    assert.deepEqual(toBuffer('0101'), consume(2))  //payments
+
+    decoded = ccEncoding.decode(code.codeBuffer)
+    console.log(decoded)
+
+    assert.equal(decoded.protocol, data.protocol)
+    assert.deepEqual(decoded.payments, data.payments)
+    assert.equal(decoded.multiSig.length, 1)
+    assert.equal(decoded.multiSig.length, code.leftover.length)
+    assert.deepEqual(decoded.multiSig[0], { hashType: 'sha2', index: 1 })
+    assert.deepEqual(code.leftover[0], sha2)
+    assert.deepEqual(decoded.torrentHash, torrentHash)
+    done()
+  })
+
+  it('Transfer OP_CODE 0x12 - SHA1 Torrent hash + SHA256 in 1(3) multisig', function (done) {
+    this.timeout(0)
+
+    //32 more bytes (16 of 2 bytes each in this case) should push torrent hash out
+    for (var i = 0 ; i < 16 ; i++) {
+      data.payments.push({skip: false, range: false, percent: false, output: 1, amount: 1})
+    }
+
+    code = ccEncoding.encode(data, 80)    
+
+    console.log(code.codeBuffer.toString('hex'), code.leftover)
+    var consume = consumer(code.codeBuffer.slice(0, code.codeBuffer.length))
+    assert.deepEqual(toBuffer('4343'), consume(2))
+    assert.deepEqual(toBuffer('02'), consume(1))  //version
+    assert.deepEqual(toBuffer('12'), consume(1))  //trasnfer OP_CODE
+    for (var i = 0 ; i < data.payments.length ; i++) {
+      assert.deepEqual(toBuffer('0101'), consume(2))    //payment
+    }
+
+    decoded = ccEncoding.decode(code.codeBuffer)
+    console.log(decoded)
+
+    assert.equal(decoded.protocol, data.protocol)
+    assert.deepEqual(decoded.payments, data.payments)
+    assert.equal(decoded.multiSig.length, 2)
+    assert.equal(decoded.multiSig.length, code.leftover.length)
+    assert.deepEqual(decoded.multiSig[0], { hashType: 'sha2', index: 1 })
+    assert.deepEqual(decoded.multiSig[1], { hashType: 'torrentHash', index: 2 })
+    assert.deepEqual(code.leftover[1], sha2)
+    assert.deepEqual(code.leftover[0], torrentHash)
     done()
   })
 
