@@ -28,7 +28,7 @@ Returns a new Buffer holding the encoded transfer.
 ##### Example:
 
 ```js
-var issuanceEncoder = require('cc-transfer-encoder')
+var transferEncoder = require('cc-transfer-encoder')
 
 
 ```
@@ -44,7 +44,7 @@ Returns a Colored Coins payment Object
 ##### Example:
 
 ```js
-var issuanceEncoder = require('cc-transfer-encoder')
+var transferEncoder = require('cc-transfer-encoder')
 
 ```
 
