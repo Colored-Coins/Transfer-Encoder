@@ -1,11 +1,20 @@
-var OP_CODES = [
-  new Buffer([0x10]), // All Hashes in OP_RETURN - Pay-to-PubkeyHash
+var TRANSFER_OP_CODES = [
+  new Buffer([0X10]), // All Hashes in OP_RETURN
   new Buffer([0x11]), // SHA2 in Pay-to-Script-Hash multi-sig output (1 out of 2)
-  new Buffer([0x12]), // All Hashes in Pay-to-Script-Hash multi-sig outputs (1 out of 3)
-  new Buffer([0x13]), // Low security transaction no SHA2 for torrent data. SHA1 is always inside OP_RETURN in this case.
-  new Buffer([0x14]), // Low security transaction no SHA2 for torrent data. SHA1 is always inside OP_RETURN in this case. also no rules inside the metadata (if there are any they will be in ignored)
-  new Buffer([0x15])  // No metadata or rules (no SHA1 or SHA2)
+  new Buffer([0X12]), // All Hashes in Pay-to-Script-Hash multi-sig outputs (1 out of 3)
+  new Buffer([0X13]), // Low security transaction no SHA2 for torrent data. SHA1 is always inside OP_RETURN in this case.
+  new Buffer([0X14]), // Low security transaction no SHA2 for torrent data. SHA1 is always inside OP_RETURN in this case. also no rules inside the metadata (if there are any they will be in ignored)
+  new Buffer([0X15])  // No metadata or rules (no SHA1 or SHA2)
 ]
+var BURN_OP_CODES = [
+  new Buffer([0X20]), // All Hashes in OP_RETURN
+  new Buffer([0x21]), // SHA2 in Pay-to-Script-Hash multi-sig output (1 out of 2)
+  new Buffer([0X22]), // All Hashes in Pay-to-Script-Hash multi-sig outputs (1 out of 3)
+  new Buffer([0X23]), // Low security transaction no SHA2 for torrent data. SHA1 is always inside OP_RETURN in this case.
+  new Buffer([0X24]), // Low security transaction no SHA2 for torrent data. SHA1 is always inside OP_RETURN in this case. also no rules inside the metadata (if there are any they will be in ignored)
+  new Buffer([0X25])  // No metadata or rules (no SHA1 or SHA2)
+]
+
 
 var paymentCodex = require('cc-payment-encoder')
 
@@ -28,6 +37,7 @@ module.exports = {
       throw new Error('Missing Data')
     }
     var opcode
+    var OP_CODES = data.type === 'burn' ? BURN_OP_CODES : TRANSFER_OP_CODES
     var hash = new Buffer(0)
     var protocol = new Buffer(padLeadingZeros(data.protocol.toString(16), 2), 'hex')
     var version = new Buffer([data.version])
@@ -70,22 +80,23 @@ module.exports = {
     data.version = parseInt(consume(1).toString('hex'), 16)
     data.multiSig = []
     var opcode = consume(1)
-    if (opcode[0] === OP_CODES[0][0]) {
+
+    if (opcode[0] === TRANSFER_OP_CODES[0][0] || opcode[0] === BURN_OP_CODES[0][0]) {
       data.torrentHash = consume(20)
       data.sha2 = consume(32)
-    } else if (opcode[0] === OP_CODES[1][0]) {
+    } else if (opcode[0] === TRANSFER_OP_CODES[1][0] || opcode[0] === BURN_OP_CODES[1][0]) {
       data.torrentHash = consume(20)
       data.multiSig.push({'index': 1, 'hashType': 'sha2'})
-    } else if (opcode[0] === OP_CODES[2][0]) {
+    } else if (opcode[0] === TRANSFER_OP_CODES[2][0] || opcode[0] === BURN_OP_CODES[2][0]) {
       data.multiSig.push({'index': 1, 'hashType': 'sha2'})
       data.multiSig.push({'index': 2, 'hashType': 'torrentHash'})
-    } else if (opcode[0] === OP_CODES[3][0]) {
+    } else if (opcode[0] === TRANSFER_OP_CODES[3][0] || opcode[0] === BURN_OP_CODES[3][0]) {
       data.torrentHash = consume(20)
       data.noRules = false
-    } else if (opcode[0] === OP_CODES[4][0]) {
+    } else if (opcode[0] === TRANSFER_OP_CODES[4][0] || opcode[0] === BURN_OP_CODES[4][0]) {
       data.torrentHash = consume(20)
       data.noRules = true
-    } else if (opcode[0] === OP_CODES[5][0]) {
+    } else if (opcode[0] === TRANSFER_OP_CODES[5][0] || opcode[0] === BURN_OP_CODES[5][0]) {
     } else {
       throw new Error('Unrecognized Code')
     }

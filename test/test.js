@@ -70,7 +70,7 @@ describe('Colored-Coins transfer Decoding', function () {
     data.payments.push({skip: true, range: false, percent: false, output: 2, amount: 3})
     data.payments.push({skip: false, range: false, percent: false, output: 3, amount: 4})
     data.payments.push({skip: true, range: false, percent: false, output: 4, amount: 5})
-    data.payments.push({skip: false, range: false, percent: false, output: 5, amount: 6})
+    data.payments.push({skip: false, percent: false, amount: 6, burn: true})
 
     result = ccEncoding.encode(data, 40)
     console.log(result.codeBuffer.toString('hex'), result.leftover)
