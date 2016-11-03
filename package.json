@@ -4,7 +4,8 @@
   "description": "The encoding/decoding functions for the colored-coins scheme transfer set of OP_CODES",
   "main": "transferEncoder.js",
   "dependencies": {
-    "cc-payment-encoder": "^1.0.0"
+    "cc-payment-encoder": "^1.0.0",
+    "cc-burn-payment-encoder": "^1.0.0"
   },
   "directories": {
     "test": "test"
