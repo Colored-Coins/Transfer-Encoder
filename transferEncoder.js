@@ -85,8 +85,6 @@ module.exports = {
     data.multiSig = []
     var opcode = consume(1)
     var paymentEncoder
-    console.log('opcode[0] = 0x', opcode[0].toString(16))
-    console.log('(opcode[0] & TYPE_MASK) = 0x', (opcode[0] & TYPE_MASK).toString(16))
     if ((opcode[0] & TYPE_MASK) === TRANSFER_MASK) {
       paymentEncoder = transferPaymentEncoder
     } else if ((opcode[0] & TYPE_MASK) === BURN_MASK) {
