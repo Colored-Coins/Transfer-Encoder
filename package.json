@@ -5,7 +5,7 @@
   "main": "transferEncoder.js",
   "dependencies": {
     "cc-payment-encoder": "^1.0.0",
-    "cc-burn-payment-encoder": "^1.0.0"
+    "cc-burn-payment-encoder": "git+https://github.com/Colored-Coins/Burn-Payment-Encoder.git#COLU-948_burn"
   },
   "directories": {
     "test": "test"
