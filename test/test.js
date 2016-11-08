@@ -76,19 +76,28 @@ describe('Colored-Coins transfer Decoding', function () {
     console.log(result.codeBuffer.toString('hex'), result.leftover)
     console.log(ccEncoding.decode(result.codeBuffer))
 
+    // check throws when pushing burn to a default transfer transaction
+    assert.throws(function () {
+      data.payments.push({skip: false, percent: false, amount: 7, burn: true})
+      ccEncoding.encode(data, 40)
+    }, /Needs output value/,
+    'Should Throw Error')
+
+    // now no error
+    data.type = 'burn'
+    result = ccEncoding.encode(data, 40)
+
     delete data.allowMeta
     data.payments = []
     data.payments.push({skip: false, range: false, percent: true, output: 12, amount: 3213213})
-    result = ccEncoding.encode(data, 80)
+    result = ccEncoding.encode(data, 40)
     console.log(result.codeBuffer.toString('hex'), result.leftover)
     console.log(ccEncoding.decode(result.codeBuffer))
     done()
   })
-
 })
 
 describe('80 byte OP_RETURN', function () {
-
   var code
   var decoded
   var torrentHash = new Buffer('46b7e0d000d69330ac1caa48c6559763828762e1', 'hex')
