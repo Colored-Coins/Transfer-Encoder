@@ -29,7 +29,7 @@ var consumer = function (buff) {
 }
 
 var padLeadingZeros = function (hex, byteSize) {
-  return (hex.length === byteSize * 2) ? hex : padLeadingZeros('0' + hex, byteSize)
+  return hex.padStart(byteSize * 2, '0')
 }
 
 module.exports = {
